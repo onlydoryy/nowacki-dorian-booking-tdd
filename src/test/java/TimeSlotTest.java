@@ -1,13 +1,10 @@
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -69,11 +66,12 @@ class TimeSlotTest {
     @ParameterizedTest
     @CsvSource({
         "10, 11, 10, 11, true",
-        "10, 11, 10, 10, false",
-        "10, 11, 11, 12, false",
         "10, 11, 9, 10, false",
-        "10, 11, 10, 10, false",
-        "10, 11, 10, 12, true"
+        "10, 11, 11, 12, false",
+        "10, 11, 9, 11, true",
+        "10, 11, 10, 12, true",
+        "10, 12, 11, 13, true",
+        "10, 12, 9, 13, true"
     })
     void checksWhetherSlotsOverlap(
         int startHourA,
