@@ -140,4 +140,19 @@ class TimeSlotTest {
 
         assertEquals(end, slot.getEnd());
     }
+
+    @Test
+    void toStringIncludesStartAndEnd() {
+        LocalDateTime start =
+            LocalDateTime.of(2026, 10, 22, 10, 0);
+        LocalDateTime end =
+            LocalDateTime.of(2026, 10, 22, 11, 30);
+
+        TimeSlot slot = new TimeSlot(start, end);
+
+        assertEquals(
+            "TimeSlot{start=2026-10-22T10:00, end=2026-10-22T11:30}",
+            slot.toString()
+        );
+    }
 }
