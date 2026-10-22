@@ -30,11 +30,12 @@ All Java classes should remain in the default package: do not add `package` decl
 
 ## Running the tests on Windows
 
-After downloading the JUnit Platform Console Standalone 6.1.3 JAR into the repository root and naming it `junit.jar`, compile and run the tests from PowerShell. These commands assume the source and test folders contain Java files:
+Download the JUnit Platform Console Standalone 6.1.3 JAR into the repository root and name it `junit.jar`. Run these commands in PowerShell once Java source and test files exist:
 
 ```powershell
 New-Item -ItemType Directory -Force out
-javac -d out -cp junit.jar src/main/java/*.java src/test/java/*.java
+$sources = Get-ChildItem -Path src/main/java,src/test/java -Filter *.java -Recurse | ForEach-Object { $_.FullName }
+javac -d out -cp junit.jar $sources
 java -jar junit.jar execute --class-path out --scan-class-path
 ```
 
