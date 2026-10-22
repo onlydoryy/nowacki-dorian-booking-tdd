@@ -10,15 +10,23 @@ public final class TimeSlot {
 
     public TimeSlot(LocalDateTime start, LocalDateTime end) {
         if (start == null || end == null) {
-            throw new IllegalArgumentException("start and end must not be null");
+            throw new IllegalArgumentException(
+                "start and end must not be null"
+            );
         }
 
         if (!end.isAfter(start)) {
-            throw new IllegalArgumentException("end must be after start");
+            throw new IllegalArgumentException(
+                "end must be after start"
+            );
         }
 
         this.start = start;
         this.end = end;
+    }
+
+    public LocalDateTime getStart() {
+        return start;
     }
 
     public Duration duration() {
@@ -26,7 +34,8 @@ public final class TimeSlot {
     }
 
     public boolean overlaps(TimeSlot other) {
-        return start.isBefore(other.end) && other.start.isBefore(end);
+        return start.isBefore(other.end)
+            && other.start.isBefore(end);
     }
 
     @Override
@@ -39,15 +48,12 @@ public final class TimeSlot {
             return false;
         }
 
-        return start.equals(other.start) && end.equals(other.end);
+        return start.equals(other.start)
+            && end.equals(other.end);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(start, end);
-    }
-
-    public LocalDateTime getStart() {
-        return null;
     }
 }
