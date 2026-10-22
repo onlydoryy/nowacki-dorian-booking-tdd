@@ -1,0 +1,11 @@
+# Compiled Java output
+out/
+*.class
+
+# Local JUnit runner (download separately; do not commit)
+junit.jar
+
+# IDE settings
+.idea/
+*.iml
+.vscode/
