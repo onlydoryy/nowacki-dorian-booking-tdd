@@ -110,4 +110,14 @@ class TimeSlotTest {
 
         assertEquals(first.hashCode(), second.hashCode());
     }
+
+    @Test
+    void getStartReturnsTheStartTime() {
+        LocalDateTime start = LocalDateTime.of(2027, 1, 11, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2027, 1, 11, 11, 0);
+
+        TimeSlot slot = new TimeSlot(start, end);
+
+        assertEquals(start, slot.getStart());
+    }
 }

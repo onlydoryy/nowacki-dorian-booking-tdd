@@ -46,4 +46,8 @@ public final class TimeSlot {
     public int hashCode() {
         return Objects.hash(start, end);
     }
+
+    public LocalDateTime getStart() {
+        return null;
+    }
 }
