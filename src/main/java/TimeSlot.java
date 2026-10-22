@@ -1,6 +1,7 @@
 
 import java.time.LocalDateTime;
 import java.time.Duration;
+import java.util.Objects;
 
 public final class TimeSlot {
 
@@ -26,5 +27,23 @@ public final class TimeSlot {
 
     public boolean overlaps(TimeSlot other) {
         return start.isBefore(other.end) && other.start.isBefore(end);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof TimeSlot other)) {
+            return false;
+        }
+
+        return start.equals(other.start) && end.equals(other.end);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(start, end);
     }
 }
