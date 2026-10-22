@@ -94,4 +94,20 @@ class TimeSlotTest {
             slot(bStart, bEnd).overlaps(slot(aStart, aEnd))
         );
     }
+
+    @Test
+    void slotsWithSameTimesAreEqual() {
+        TimeSlot first = slot(10, 11);
+        TimeSlot second = slot(10, 11);
+
+        assertEquals(first, second);
+    }
+
+    @Test
+    void equalSlotsHaveSameHashCode() {
+        TimeSlot first = slot(10, 11);
+        TimeSlot second = slot(10, 11);
+
+        assertEquals(first.hashCode(), second.hashCode());
+    }
 }
