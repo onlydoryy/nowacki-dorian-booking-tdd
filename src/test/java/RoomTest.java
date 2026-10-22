@@ -11,4 +11,11 @@ class RoomTest {
 
         assertEquals("ROOM-101", room.getId());
     }
+
+    @Test
+    void getNameReturnsRoomName() {
+        Room room = new Room("ROOM-101", "Study Room 101");
+
+        assertEquals("Study Room 101", room.getName());
+    }
 }
