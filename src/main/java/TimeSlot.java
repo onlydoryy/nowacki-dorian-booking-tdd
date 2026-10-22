@@ -1,5 +1,6 @@
 
 import java.time.LocalDateTime;
+import java.time.Duration;
 
 public final class TimeSlot {
 
@@ -11,5 +12,9 @@ public final class TimeSlot {
         if (!end.isAfter(start)) {
             throw new IllegalArgumentException("end must be after start");
         }
+    }
+
+    public Duration duration() {
+        return null;
     }
 }
