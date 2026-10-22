@@ -1,39 +1,23 @@
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.time.LocalDateTime;
-import java.time.Duration;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 class TimeSlotTest {
 
     @Test
-    void endBeforeStartIsRejected() {
-        LocalDateTime ten = LocalDateTime.of(2027, 1, 11, 10, 0);
-        LocalDateTime nine = LocalDateTime.of(2027, 1, 11, 9, 0);
-
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> new TimeSlot(ten, nine)
-        );
-    }
-
-    @Test
-    void equalStartAndEndIsRejected() {
-        LocalDateTime ten = LocalDateTime.of(2027, 1, 11, 10, 0);
-
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> new TimeSlot(ten, ten)
-        );
-    }
-
-    @Test
-    void nullStartIsRejected() {
-        LocalDateTime end = LocalDateTime.of(2027, 1, 11, 11, 0);
+    void rejectsNullStart() {
+        LocalDateTime end = LocalDateTime.of(2026, 10, 22, 11, 0);
 
         assertThrows(
             IllegalArgumentException.class,
@@ -42,8 +26,8 @@ class TimeSlotTest {
     }
 
     @Test
-    void nullEndIsRejected() {
-        LocalDateTime start = LocalDateTime.of(2027, 1, 11, 10, 0);
+    void rejectsNullEnd() {
+        LocalDateTime start = LocalDateTime.of(2026, 10, 22, 10, 0);
 
         assertThrows(
             IllegalArgumentException.class,
@@ -52,72 +36,110 @@ class TimeSlotTest {
     }
 
     @Test
-    void durationIsCalculatedInMinutes() {
-        LocalDateTime start = LocalDateTime.of(2027, 1, 11, 10, 0);
-        LocalDateTime end = LocalDateTime.of(2027, 1, 11, 11, 30);
+    void rejectsEndBeforeStart() {
+        LocalDateTime start = LocalDateTime.of(2026, 10, 22, 11, 0);
+        LocalDateTime end = LocalDateTime.of(2026, 10, 22, 10, 0);
+
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> new TimeSlot(start, end)
+        );
+    }
+
+    @Test
+    void rejectsEqualStartAndEnd() {
+        LocalDateTime time = LocalDateTime.of(2026, 10, 22, 10, 0);
+
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> new TimeSlot(time, time)
+        );
+    }
+
+    @Test
+    void calculatesDurationInMinutes() {
+        LocalDateTime start = LocalDateTime.of(2026, 10, 22, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2026, 10, 22, 11, 30);
 
         TimeSlot slot = new TimeSlot(start, end);
 
         assertEquals(Duration.ofMinutes(90), slot.duration());
     }
 
-    private static TimeSlot slot(int startHour, int endHour) {
-        return new TimeSlot(
-            LocalDateTime.of(2027, 1, 11, startHour, 0),
-            LocalDateTime.of(2027, 1, 11, endHour, 0)
-        );
-    }
-
-    @ParameterizedTest(name = "{0}-{1} vs {2}-{3} overlaps: {4}")
+    @ParameterizedTest
     @CsvSource({
+        "10, 11, 10, 11, true",
+        "10, 11, 10, 10, false",
         "10, 11, 11, 12, false",
-        "10, 12, 11, 13, true",
-        "10, 11, 12, 13, false",
-        "10, 12, 10, 11, true",
-        "10, 12, 10, 12, true",
-        "12, 13, 10, 12, false"
+        "10, 11, 9, 10, false",
+        "10, 11, 10, 10, false",
+        "10, 11, 10, 12, true"
     })
-    void overlapCases(
-        int aStart,
-        int aEnd,
-        int bStart,
-        int bEnd,
+    void checksWhetherSlotsOverlap(
+        int startHourA,
+        int endHourA,
+        int startHourB,
+        int endHourB,
         boolean expected
     ) {
-        assertEquals(
-            expected,
-            slot(aStart, aEnd).overlaps(slot(bStart, bEnd))
-        );
+        LocalDateTime startA =
+            LocalDateTime.of(2026, 10, 22, startHourA, 0);
+        LocalDateTime endA =
+            LocalDateTime.of(2026, 10, 22, endHourA, 0);
 
-        assertEquals(
-            expected,
-            slot(bStart, bEnd).overlaps(slot(aStart, aEnd))
-        );
+        LocalDateTime startB =
+            LocalDateTime.of(2026, 10, 22, startHourB, 0);
+        LocalDateTime endB =
+            LocalDateTime.of(2026, 10, 22, endHourB, 0);
+
+        TimeSlot a = new TimeSlot(startA, endA);
+        TimeSlot b = new TimeSlot(startB, endB);
+
+        assertEquals(expected, a.overlaps(b));
+        assertEquals(a.overlaps(b), b.overlaps(a));
     }
 
     @Test
-    void slotsWithSameTimesAreEqual() {
-        TimeSlot first = slot(10, 11);
-        TimeSlot second = slot(10, 11);
+    void equalSlotsAreEqualAndHaveSameHashCode() {
+        LocalDateTime start = LocalDateTime.of(2026, 10, 22, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2026, 10, 22, 11, 0);
+
+        TimeSlot first = new TimeSlot(start, end);
+        TimeSlot second = new TimeSlot(start, end);
 
         assertEquals(first, second);
-    }
-
-    @Test
-    void equalSlotsHaveSameHashCode() {
-        TimeSlot first = slot(10, 11);
-        TimeSlot second = slot(10, 11);
-
         assertEquals(first.hashCode(), second.hashCode());
     }
 
     @Test
+    void differentSlotsAreNotEqual() {
+        LocalDateTime start = LocalDateTime.of(2026, 10, 22, 10, 0);
+        LocalDateTime endA = LocalDateTime.of(2026, 10, 22, 11, 0);
+        LocalDateTime endB = LocalDateTime.of(2026, 10, 22, 12, 0);
+
+        TimeSlot first = new TimeSlot(start, endA);
+        TimeSlot second = new TimeSlot(start, endB);
+
+        assertNotEquals(first, second);
+    }
+
+    @Test
     void getStartReturnsTheStartTime() {
-        LocalDateTime start = LocalDateTime.of(2027, 1, 11, 10, 0);
-        LocalDateTime end = LocalDateTime.of(2027, 1, 11, 11, 0);
+        LocalDateTime start = LocalDateTime.of(2026, 10, 22, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2026, 10, 22, 11, 30);
 
         TimeSlot slot = new TimeSlot(start, end);
 
         assertEquals(start, slot.getStart());
+    }
+
+    @Test
+    void getEndReturnsTheEndTime() {
+        LocalDateTime start = LocalDateTime.of(2026, 10, 22, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2026, 10, 22, 11, 30);
+
+        TimeSlot slot = new TimeSlot(start, end);
+
+        assertEquals(end, slot.getEnd());
     }
 }
