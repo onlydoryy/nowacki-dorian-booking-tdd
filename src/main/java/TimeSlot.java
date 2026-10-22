@@ -29,6 +29,10 @@ public final class TimeSlot {
         return start;
     }
 
+    public LocalDateTime getEnd() {
+        return end;
+    }
+
     public Duration duration() {
         return Duration.between(start, end);
     }
