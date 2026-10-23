@@ -1,7 +1,14 @@
-import org.junit.jupiter.api.*;
-import java.time.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BookingServiceTest {
 
@@ -40,6 +47,32 @@ class BookingServiceTest {
 
         assertEquals(
                 new Booking("alice", "R1", slot(10, 11)),
+                booking
+        );
+    }
+
+    @Test
+    void bookingANonexistentRoomThrowsException() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.book("alice", "R99", slot(10, 11))
+        );
+    }
+
+    @Test
+    void bookingInThePastThrowsException() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.book("alice", "R1", slot(8, 9))
+        );
+    }
+
+    @Test
+    void bookingExactlyThreeHoursIsAllowed() {
+        Booking booking = service.book("alice", "R1", slot(10, 13));
+
+        assertEquals(
+                new Booking("alice", "R1", slot(10, 13)),
                 booking
         );
     }
