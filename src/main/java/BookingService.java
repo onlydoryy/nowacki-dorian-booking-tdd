@@ -29,6 +29,7 @@ public class BookingService {
         rules.add(new BookingDurationMustNotExceedThreeHours());
         rules.add(new RoomHasNoOverlappingBooking(bookings));
         rules.add(new UserHasNoOverlappingBooking(bookings));
+        rules.add(new UserHasAtMostThreeActiveBookings(bookings, clock));
     }
 
     public Booking book(String userId, String roomId, TimeSlot slot) {
