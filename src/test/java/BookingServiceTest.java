@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BookingServiceTest {
 
-    // The clock is fixed at 09:00 on 11 January 2027.
     private static final Clock CLOCK =
             Clock.fixed(
                     Instant.parse("2027-01-11T09:00:00Z"),
@@ -74,6 +73,24 @@ class BookingServiceTest {
         assertEquals(
                 new Booking("alice", "R1", slot(10, 13)),
                 booking
+        );
+    }
+
+    @Test
+    void bookingLongerThanThreeHoursThrowsException() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.book("alice", "R1", slot(10, 14))
+        );
+    }
+
+    @Test
+    void bookingAnAlreadyBookedRoomAtAnOverlappingTimeThrowsException() {
+        service.book("alice", "R1", slot(10, 11));
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> service.book("bob", "R1", slot(10, 11))
         );
     }
 }
