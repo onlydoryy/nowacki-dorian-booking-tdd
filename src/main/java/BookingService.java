@@ -29,7 +29,12 @@ public class BookingService {
         rules.add(new BookingDurationMustNotExceedThreeHours());
         rules.add(new RoomHasNoOverlappingBooking(bookings));
         rules.add(new UserHasNoOverlappingBooking(bookings));
+
+        // D-1: A user may have at most three active bookings.
         rules.add(new UserHasAtMostThreeActiveBookings(bookings, clock));
+
+        // D-2: A booking cannot start more than fourteen days ahead.
+        rules.add(new BookingMustStartWithinFourteenDays(clock));
     }
 
     public Booking book(String userId, String roomId, TimeSlot slot) {
