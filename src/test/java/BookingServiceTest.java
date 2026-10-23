@@ -107,7 +107,7 @@ class BookingServiceTest {
 
     @Test
     void userCanCancelTheirOwnBooking() {
-        Booking booking = service.book("alice", "R1", slot(10, 11));
+        service.book("alice", "R1", slot(10, 11));
 
         service.cancel("alice", "R1", slot(10, 11));
 
@@ -153,6 +153,18 @@ class BookingServiceTest {
         assertEquals(
                 List.of(new Booking("alice", "R1", slot(10, 11))),
                 service.bookingsFor("alice")
+        );
+    }
+
+    @Test
+    void userCannotHaveMoreThanThreeActiveBookings() {
+        service.book("alice", "R1", slot(10, 11));
+        service.book("alice", "R2", slot(11, 12));
+        service.book("alice", "R1", slot(12, 13));
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> service.book("alice", "R2", slot(13, 14))
         );
     }
 }
