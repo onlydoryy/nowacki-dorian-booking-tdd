@@ -1,7 +1,7 @@
 
 import java.time.Clock;
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -12,6 +12,7 @@ public class BookingService {
     private final IRoomRepository rooms;
     private final IBookingRepository bookings;
     private final Clock clock;
+    private final List<BookingRule> rules;
 
     public BookingService(
             IRoomRepository rooms,
@@ -21,61 +22,24 @@ public class BookingService {
         this.rooms = rooms;
         this.bookings = bookings;
         this.clock = clock;
+
+        this.rules = new ArrayList<>();
+        rules.add(new RoomMustExist(rooms));
+        rules.add(new BookingMustStartInFuture(clock));
+        rules.add(new BookingDurationMustNotExceedThreeHours());
+        rules.add(new RoomHasNoOverlappingBooking(bookings));
+        rules.add(new UserHasNoOverlappingBooking(bookings));
     }
 
     public Booking book(String userId, String roomId, TimeSlot slot) {
-        checkRoomExists(roomId);
-        checkStartIsInFuture(slot);
-        checkMaximumDuration(slot);
-        checkRoomHasNoOverlap(roomId, slot);
-        checkUserHasNoOverlap(userId, slot);
+        for (BookingRule rule : rules) {
+            rule.check(userId, roomId, slot);
+        }
 
         Booking booking = new Booking(userId, roomId, slot);
         bookings.save(booking);
 
         return booking;
-    }
-
-    private void checkRoomExists(String roomId) {
-        if (rooms.findById(roomId) == null) {
-            throw new IllegalArgumentException("Room does not exist");
-        }
-    }
-
-    private void checkStartIsInFuture(TimeSlot slot) {
-        if (!slot.getStart().isAfter(LocalDateTime.now(clock))) {
-            throw new IllegalArgumentException(
-                    "Booking must start in the future"
-            );
-        }
-    }
-
-    private void checkMaximumDuration(TimeSlot slot) {
-        if (slot.duration().compareTo(MAX_SLOT) > 0) {
-            throw new IllegalArgumentException(
-                    "Booking cannot exceed three hours"
-            );
-        }
-    }
-
-    private void checkRoomHasNoOverlap(String roomId, TimeSlot slot) {
-        for (Booking existing : bookings.findByRoom(roomId)) {
-            if (existing.getSlot().overlaps(slot)) {
-                throw new IllegalStateException(
-                        "Room is already booked for this time"
-                );
-            }
-        }
-    }
-
-    private void checkUserHasNoOverlap(String userId, TimeSlot slot) {
-        for (Booking existing : bookings.findByUser(userId)) {
-            if (existing.getSlot().overlaps(slot)) {
-                throw new IllegalStateException(
-                        "User already has an overlapping booking"
-                );
-            }
-        }
     }
 
     public void cancel(String userId, String roomId, TimeSlot slot) {
