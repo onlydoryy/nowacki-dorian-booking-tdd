@@ -1,51 +1,43 @@
-# Study Room Booking — TDD Assessment
 
-This repository contains my Java and JUnit work for the Agile Software Verification Study Room Booking assessment.
+# Study Room Booking
 
-## Aim
+A Java application for managing study room bookings.
 
-Develop the booking system using test-driven development (TDD): write a test first, run it and observe it fail, implement the smallest change needed to pass, then refactor only when the tests are green.
+## Requirements
 
-## Tools
+- Java JDK
+- The JUnit standalone JAR file named `junit.jar`
 
-- Java 21
-- JUnit Platform Console Standalone 6.1.3
-- Visual Studio Code
-- Git and GitHub
+Do not commit `junit.jar` to the repository.
 
-## Project structure
+## Compile the project
 
-```text
-.
-├── README.md
-├── NOTES.md
-├── .gitignore
-├── junit.jar                 # local test runner; not committed
-└── src/
-    ├── main/java/            # production Java classes
-    └── test/java/            # JUnit tests
+Run this command from the project root:
+
+```cmd
+javac -d out -cp junit.jar src/main/java/*.java src/test/java/*.java
 ```
 
-All Java classes should remain in the default package: do not add `package` declarations.
+## Run the tests
 
-## Running the tests on Windows
+Run this command from the project root:
 
-Download the JUnit Platform Console Standalone 6.1.3 JAR into the repository root and name it `junit.jar`. Run these commands in PowerShell once Java source and test files exist:
-
-```powershell
-New-Item -ItemType Directory -Force out
-$sources = Get-ChildItem -Path src/main/java,src/test/java -Filter *.java -Recurse | ForEach-Object { $_.FullName }
-javac -d out -cp junit.jar $sources
+```cmd
 java -jar junit.jar execute --class-path out --scan-class-path
 ```
 
-If the lecturer's assessment brief specifies a different command or setup, follow the brief.
+## Main functionality
 
-## TDD and Git workflow
+- Validate that a room exists before booking.
+- Reject bookings that start in the past.
+- Enforce a maximum booking duration of three hours.
+- Prevent overlapping bookings for the same room.
+- Prevent a user from making overlapping bookings across different rooms.
+- Allow users to cancel their own bookings.
+- Return a user's bookings in chronological order.
 
-- Write a meaningful failing test before changing production code.
-- Make small, focused changes and commit them using the required commit-message format from the assessment brief.
-- Run the tests after each change.
-- Push regularly, and ensure the final branch and complete commit history are pushed before submission.
+## Design
 
-See [NOTES.md](NOTES.md) for genuine issues, decisions, feedback, and corrections encountered while working.
+The application uses repository interfaces to separate booking logic from data storage. In-memory repositories are provided for storing rooms and bookings during execution.
+
+`BookingService` receives a `Clock` through its constructor so that time-dependent behaviour can be tested predictably.
