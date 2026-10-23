@@ -167,4 +167,19 @@ class BookingServiceTest {
                 () -> service.book("alice", "R2", slot(13, 14))
         );
     }
+
+    @Test
+    void bookingMoreThanFourteenDaysAheadThrowsException() {
+        LocalDateTime start =
+                LocalDateTime.of(2027, 1, 26, 10, 0);
+        LocalDateTime end =
+                LocalDateTime.of(2027, 1, 26, 11, 0);
+
+        TimeSlot futureSlot = new TimeSlot(start, end);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.book("alice", "R1", futureSlot)
+        );
+    }
 }
