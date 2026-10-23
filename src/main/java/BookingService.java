@@ -24,22 +24,41 @@ public class BookingService {
     }
 
     public Booking book(String userId, String roomId, TimeSlot slot) {
+        checkRoomExists(roomId);
+        checkStartIsInFuture(slot);
+        checkMaximumDuration(slot);
+        checkRoomHasNoOverlap(roomId, slot);
+        checkUserHasNoOverlap(userId, slot);
+
+        Booking booking = new Booking(userId, roomId, slot);
+        bookings.save(booking);
+
+        return booking;
+    }
+
+    private void checkRoomExists(String roomId) {
         if (rooms.findById(roomId) == null) {
             throw new IllegalArgumentException("Room does not exist");
         }
+    }
 
+    private void checkStartIsInFuture(TimeSlot slot) {
         if (!slot.getStart().isAfter(LocalDateTime.now(clock))) {
             throw new IllegalArgumentException(
                     "Booking must start in the future"
             );
         }
+    }
 
+    private void checkMaximumDuration(TimeSlot slot) {
         if (slot.duration().compareTo(MAX_SLOT) > 0) {
             throw new IllegalArgumentException(
                     "Booking cannot exceed three hours"
             );
         }
+    }
 
+    private void checkRoomHasNoOverlap(String roomId, TimeSlot slot) {
         for (Booking existing : bookings.findByRoom(roomId)) {
             if (existing.getSlot().overlaps(slot)) {
                 throw new IllegalStateException(
@@ -47,7 +66,9 @@ public class BookingService {
                 );
             }
         }
+    }
 
+    private void checkUserHasNoOverlap(String userId, TimeSlot slot) {
         for (Booking existing : bookings.findByUser(userId)) {
             if (existing.getSlot().overlaps(slot)) {
                 throw new IllegalStateException(
@@ -55,11 +76,6 @@ public class BookingService {
                 );
             }
         }
-
-        Booking booking = new Booking(userId, roomId, slot);
-        bookings.save(booking);
-
-        return booking;
     }
 
     public void cancel(String userId, String roomId, TimeSlot slot) {
