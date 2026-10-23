@@ -6,6 +6,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -101,6 +102,57 @@ class BookingServiceTest {
         assertThrows(
                 IllegalStateException.class,
                 () -> service.book("alice", "R2", slot(10, 11))
+        );
+    }
+
+    @Test
+    void userCanCancelTheirOwnBooking() {
+        Booking booking = service.book("alice", "R1", slot(10, 11));
+
+        service.cancel("alice", "R1", slot(10, 11));
+
+        assertEquals(List.of(), service.bookingsFor("alice"));
+    }
+
+    @Test
+    void userCannotCancelAnotherUsersBooking() {
+        service.book("alice", "R1", slot(10, 11));
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.cancel("bob", "R1", slot(10, 11))
+        );
+
+        assertEquals(
+                List.of(new Booking("alice", "R1", slot(10, 11))),
+                service.bookingsFor("alice")
+        );
+    }
+
+    @Test
+    void bookingsForReturnsBookingsInChronologicalOrder() {
+        service.book("alice", "R1", slot(12, 13));
+        service.book("alice", "R2", slot(10, 11));
+        service.book("alice", "R1", slot(14, 15));
+
+        assertEquals(
+                List.of(
+                        new Booking("alice", "R2", slot(10, 11)),
+                        new Booking("alice", "R1", slot(12, 13)),
+                        new Booking("alice", "R1", slot(14, 15))
+                ),
+                service.bookingsFor("alice")
+        );
+    }
+
+    @Test
+    void bookingsForReturnsOnlyTheSpecifiedUsersBookings() {
+        service.book("alice", "R1", slot(10, 11));
+        service.book("bob", "R2", slot(12, 13));
+
+        assertEquals(
+                List.of(new Booking("alice", "R1", slot(10, 11))),
+                service.bookingsFor("alice")
         );
     }
 }
